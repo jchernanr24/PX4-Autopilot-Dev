@@ -2896,6 +2896,11 @@ Commander::run()
 			_param_flight_uuid.commit_no_notification();
 
 			_last_disarmed_timestamp = hrt_absolute_time();
+
+			// Switch back to Hold mode after autonomous landing
+			if (_vehicle_control_mode.flag_control_auto_enabled) {
+				main_state_transition(_status, commander_state_s::MAIN_STATE_AUTO_LOITER, _status_flags, _internal_state);
+			}
 		}
 
 		if (!_arm_state_machine.isArmed()) {
