@@ -381,7 +381,8 @@ void FixedwingAttitudeControl::Run()
 		}
 
 		/* lock integrator until control is started or for long intervals (> 20 ms) */
-		bool lock_integrator = !_vcontrol_mode.flag_control_rates_enabled
+		/* AML modified: will lock the integrator in acro, unlock in stabilized. */
+		bool lock_integrator = !(_vcontrol_mode.flag_control_rates_enabled && _vcontrol_mode.flag_control_attitude_enabled)
 				       || (_vehicle_status.vehicle_type == vehicle_status_s::VEHICLE_TYPE_ROTARY_WING && ! _vehicle_status.in_transition_mode)
 				       || (dt > 0.02f);
 
@@ -592,6 +593,24 @@ void FixedwingAttitudeControl::Run()
 
 				_rate_sp_pub.publish(_rates_sp);
 
+
+				/*---------------- AML modification start ------------------- */
+				/* Add values/flags that  should be reset upon returning to stabilized here*/
+				/* Also include a subscription to local pos to make it available upon entering acro */
+
+				_previous_yaw = euler_angles.psi();
+				_initial_heading = _previous_yaw;
+				_previous_time = hrt_absolute_time() / 1e6;
+				_time_elapsed = 0.0f;
+				_e_int_1 = 0.0f;
+				_e_int_2 = 0.0f;
+				_e_int_3 = 0.0f;
+
+				_yaw_test_profile = _previous_yaw;
+				_pitch_test_profile = 0.0f;
+				_roll_test_profile = 0.0f;
+
+				/*---------------- AML modification end --------------------- */
 			} else {
 				vehicle_rates_setpoint_poll();
 
@@ -599,17 +618,50 @@ void FixedwingAttitudeControl::Run()
 				_yaw_ctrl.set_bodyrate_setpoint(_rates_sp.yaw);
 				_pitch_ctrl.set_bodyrate_setpoint(_rates_sp.pitch);
 
-				float roll_u = _roll_ctrl.control_bodyrate(dt, control_input);
-				_actuators.control[actuator_controls_s::INDEX_ROLL] = (PX4_ISFINITE(roll_u)) ? roll_u + trim_roll : trim_roll;
 
-				float pitch_u = _pitch_ctrl.control_bodyrate(dt, control_input);
-				_actuators.control[actuator_controls_s::INDEX_PITCH] = (PX4_ISFINITE(pitch_u)) ? pitch_u + trim_pitch : trim_pitch;
+				/*------- AML Comment this section out to hijack acro mode -----------*/
+				// float roll_u = _roll_ctrl.control_bodyrate(dt, control_input);
+				// _actuators.control[actuator_controls_s::INDEX_ROLL] = (PX4_ISFINITE(roll_u)) ? roll_u + trim_roll : trim_roll;
 
-				float yaw_u = _yaw_ctrl.control_bodyrate(dt, control_input);
-				_actuators.control[actuator_controls_s::INDEX_YAW] = (PX4_ISFINITE(yaw_u)) ? yaw_u + trim_yaw : trim_yaw;
+				// float pitch_u = _pitch_ctrl.control_bodyrate(dt, control_input);
+				// _actuators.control[actuator_controls_s::INDEX_PITCH] = (PX4_ISFINITE(pitch_u)) ? pitch_u + trim_pitch : trim_pitch;
 
-				_actuators.control[actuator_controls_s::INDEX_THROTTLE] = PX4_ISFINITE(_rates_sp.thrust_body[0]) ?
-						_rates_sp.thrust_body[0] : 0.0f;
+				// float yaw_u = _yaw_ctrl.control_bodyrate(dt, control_input);
+				// _actuators.control[actuator_controls_s::INDEX_YAW] = (PX4_ISFINITE(yaw_u)) ? yaw_u + trim_yaw : trim_yaw;
+
+				// _actuators.control[actuator_controls_s::INDEX_THROTTLE] = PX4_ISFINITE(_rates_sp.thrust_body[0]) ?
+				// 		_rates_sp.thrust_body[0] : 0.0f;
+
+				/*------------- AML end comment out section -----------------*/
+
+				/*------------- AML start: Put custom controller here -----------*/
+
+
+				float _time_loop_start = hrt_absolute_time();
+				_time_loop_start = _time_loop_start; // gets rid of unused flag
+
+				float _time_attitude_now = hrt_absolute_time() / 1e6;
+				_delta_time_attitude = _time_attitude_now - _previous_time;
+				_previous_time = _time_attitude_now;
+
+				_time_elapsed = _time_elapsed + _delta_time_attitude;
+
+
+
+
+
+
+
+
+
+
+
+
+				/*------------ AML end custom controller ------------------------*/
+
+
+
+
 			}
 
 			rate_ctrl_status_s rate_ctrl_status{};

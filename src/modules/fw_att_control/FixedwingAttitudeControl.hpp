@@ -138,6 +138,67 @@ private:
 
 	bool _is_tailsitter{false};
 
+	//JUAN custom variables
+	float _previous_yaw{0.0f};
+
+
+	// for attitude maneuvers
+	float _yaw_test_profile{0.0f};
+	float _roll_test_profile{0.0f};
+	float _pitch_test_profile{0.0f};
+
+	float _yaw_rate_reference{0.0f};
+	float _pitch_rate_reference{0.0f};
+	float _roll_rate_reference{0.0f};
+
+
+	// other variables
+	float _previous_time{0.0f};
+	float _ground_velocity_corrected{5.0f};
+	float _time_elapsed{0.0f};
+	float _delta_time_attitude{0.0f};
+	float _e_int_1{0.0f};
+	float _e_int_2{0.0f};
+	float _e_int_3{0.0f};
+
+	// // position control variables
+	// float _pos_x_ref{0.0f}; // position references
+	// float _pos_y_ref{0.0f};
+	// float _pos_z_ref{0.0f};
+	// float _vel_x_ref{0.0f}; // velocity references
+	// float _vel_y_ref{0.0f};
+	// float _vel_z_ref{0.0f};
+	float _initial_heading{0.0f}; // initialization values
+	// float _pos_x_initial{0.0f};
+	// float _pos_y_initial{0.0f};
+	// float _pos_z_initial{0.0f};
+	// float _initial_vxy{0.0f};
+	// float _error_x_int{0.0f};
+	// float _error_y_int{0.0f};
+	// float _error_z_int{0.0f};
+
+	// Position controller outputs: ref. DCM and thrust command.
+	// float C_reference_rows[9] = {1.0f, 0.0f,0.0f,0.0f,1.0f,0.0f,0.0f,0.0f,1.0f};
+	// float ThrustN{0.0f};
+	// int _control_operation_mode{0}; // controller exception management
+	// float belly_n_old;
+	// float belly_e_old;
+	// matrix::Dcmf C_bi;
+	// matrix::Dcmf C_ri_pos;
+	// float _error_heading_int{0.0f};
+	// int _JUAN_flight_mode{1};
+	// matrix::Vector3f _omega_reference_body;
+	// float _throttle_out;
+	// matrix::Dcmf C_ri;
+	// float _previous_rpm{900.0f};
+	// float _advance_ratio{0.5f};
+	// matrix::Vector3f _alpha_reference_body;
+	// float _global_jar;
+
+
+
+
+
 	DEFINE_PARAMETERS(
 		(ParamFloat<px4::params::FW_ACRO_X_MAX>) _param_fw_acro_x_max,
 		(ParamFloat<px4::params::FW_ACRO_Y_MAX>) _param_fw_acro_y_max,
